@@ -1,3 +1,4 @@
+
 import pytest
 import allure
 from selenium import webdriver
@@ -7,9 +8,8 @@ from selenium.webdriver.firefox.service import Service as FS
 from webdriver_manager.chrome import ChromeDriverManager
 from webdriver_manager.firefox import GeckoDriverManager
 
-@allure.step('Открываем браузер')
 
-@pytest.fixture(params=["firefox", "chrome"])
+@pytest.fixture(params=["firefox"])  #, "chrome" - браузер Chrome не используем в задании, поэтому убран из параметризации
 def driver(request):
     if request.param == "firefox":
         firefox_driver = GeckoDriverManager().install()

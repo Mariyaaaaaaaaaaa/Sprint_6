@@ -1,5 +1,5 @@
-from selenium import webdriver
-from selenium.webdriver.common.by import By
+import allure
+
 from selenium.webdriver.support import expected_conditions
 from selenium.webdriver.support.wait import WebDriverWait
 
@@ -7,81 +7,86 @@ from locators import BasePageLocators
 from data import ConstantData
 
 
-""" Базовый класс для главной страницы и страницы заказа """
 class BasePage:
+    """ Базовый класс для Главной страницы и страницы заказа """
+
+    @allure.step('Открываем браузер')
     def __init__(self, driver):
         self.driver = driver
 
     """  Общие методы  """
 
-    """ Открытие страницы """
     def open_page(self, url):
+        """ Открытие страницы """
         self.driver.get(url)
 
-    """ Ожидание загрузки элемента """
     def wait_for_load_element(self, locator):
+        """ Ожидание загрузки элемента """
         return WebDriverWait(self.driver, 5).until(
             expected_conditions.visibility_of_element_located(locator))
 
-    """ Ожидание открытия страницы при переходе по ссылке """
-    def wait_for_open_page(self, page_url):
-
+    def wait_for_load_all_elements(self, locator):
+        """ Ожидание загрузки всех элементов """
         return WebDriverWait(self.driver, 10).until(
-                    expected_conditions.url_to_be(page_url))
+            expected_conditions.visibility_of_all_elements_located(locator))
 
-    """ Ожидание появления элемента """
+    def wait_for_open_page(self, page_url):
+        """ Ожидание открытия страницы при переходе по ссылке """
+        return WebDriverWait(self.driver, 10).until(
+            expected_conditions.url_to_be(page_url))
+
     def wait_for_presence_of_element(self, locator):
-        return WebDriverWait(self.driver, 5).until(
+        """ Ожидание появления элемента """
+        return WebDriverWait(self.driver, 10).until(
             expected_conditions.presence_of_element_located(locator))
 
-    """ Поиск элемента """
     def find_element(self, locator):
+        """ Поиск элемента по локатору """
         return self.driver.find_element(*locator)
 
-    """ Поиск элементов """
     def find_elements(self, locator):
+        """ Поиск элементов по локатору """
         return self.driver.find_elements(*locator)
 
-    """ Клик по элементу """
     def click_element(self, locator):
+        """ Клик по элементу """
         self.driver.find_element(*locator).click()
 
-    """ Ввод текста в поле """
     def set_value(self, locator, value):
+        """ Ввод текста в поле """
         self.driver.find_element(*locator).send_keys(value)
 
-    """ Получение значения  """
     def check_value(self, locator):
+        """ Получение значения  """
         return self.driver.find_element(*locator).get_attribute("value")
 
-    """ Получение текста """
     def check_text(self, locator):
+        """ Получение текста """
         return self.driver.find_element(*locator).text
 
 
     """  Специальные методы для работы со страницами  """
 
-
-    """  Скролл страницы до элемента """
+    @allure.step('Прокручиваем страницу до элемента по локатору')
     def scroll_to_element(self, locator):
         element = self.driver.find_element(*locator)
         self.driver.execute_script("arguments[0].scrollIntoView();", element)
 
-    """  Проверка открытия новой вкладки """
+    @allure.step('Проверяем открытие новой вкладки')
     def check_new_window(self):
         return len(self.driver.window_handles) > 1
 
-    """ Переключение на новую вкладку """
+    @allure.step('Переключение на новую вкладку')
     def switch_to_new_window(self):
         return self.driver.switch_to.window(self.driver.window_handles[1])
 
-    """ Ожидание загрузки в новой вкладке главной страницы Яндекс Дзен """
-    def wait_for_new_window(self, new_url=data.DZEN_URL):
-        WebDriverWait(self.driver, 10).until(
-            expected_conditions.url_changes(data.BLANK_URL))
-        return WebDriverWait(self.driver, 10).until(
+    @allure.step('Ожидание загрузки в новой вкладке главной страницы Яндекс Дзен через редирект')
+    def wait_for_new_window(self, new_url=ConstantData.DZEN_URL):
+        WebDriverWait(self.driver, 30).until(
+            expected_conditions.url_changes(ConstantData.BLANK_URL))
+        return WebDriverWait(self.driver, 30).until(
             expected_conditions.url_to_be(new_url))
 
-    """  Согласие с куки """
+    @allure.step('Кликаем согласие с куки')
     def click_accept_cookies_button(self):
-        self.driver.find_element(*base_page_locators.cookie_button).click()
+        self.driver.find_element(*BasePageLocators.cookie_button).click()
